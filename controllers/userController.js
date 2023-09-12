@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { User } = require("../models/user");
+const User = require("../models/user");
 
 const { getUser } = require("../_helpers");
 const { hashPassword } = require("../utils/bcrypt");
@@ -23,8 +23,18 @@ const userController = {
         .catch((err) => res.status(500).json(err));
     });
   },
-  signIn: async (req, res, next) => {},
-  getUser: async (req, res, next) => {},
-  logout: async (req, res, next) => {},
-  putUser: async (req, res, next) => {},
+  signIn:  (req, res, next) => {
+    return res.status(200).json("登入成功！");
+  },
+  getUser:  (req, res, next) => {
+    return res.status(200).json("取得使用者資料！");
+  },
+  logout:  (req, res, next) => {
+    return res.status(200).json("登出成功！");
+  },
+  putUser:  (req, res, next) => {
+    return res.status(200).json("修改使用者資料！");
+  },
 };
+
+module.exports = userController;

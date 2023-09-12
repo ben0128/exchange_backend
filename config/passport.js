@@ -1,79 +1,91 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
-const bcryptUtils = require("../utils/bcrypt");
+const {
+  comparePassword,
+  generatePassword,
+  hashPassword,
+} = require("../utils/bcrypt");
 const User = require("../models/user");
+const passportJWT = require("passport-jwt");
+const JWTStrategy = passportJWT.Strategy;
+const ExtractJWT = passportJWT.ExtractJwt;
 
-module.exports = (app) => {
-  app.use(passport.initialize());
-  app.use(passport.session());
-  passport.use(
-    new LocalStrategy(
-      {
-        usernameField: "email",
-        passReqToCallback: true,
-        failureFlash: true,
-      },
-      (req, email, password, done) => {
-        User.findOne({ email })
-          .then((user) => {
-            if (!user) {
-              return done(
-                null,
-                false,
-                req.flash("warning_msg", "That email is not registered!")
-              );
-            }
-            return bcryptUtils
-              .comparePassword(password, user.password)
-              .then((isMatch) => {
-                if (!isMatch) {
-                  return done(
-                    null,
-                    false,
-                    req.flash("warning_msg", "Email or Password incorrect.")
-                  );
-                }
-                return done(null, user);
-              });
-          })
-          .then((err) => done(err, false));
-      }
-    )
-  );
-  passport.use(
-    new FacebookStrategy(
-      {
-        clientID: process.env.FACEBOOK_ID,
-        clientSecret: process.env.FACEBOOK_SECRET,
-        callbackURL: process.env.BASE_URL,
-        profileFields: ["email", "displayName"],
-      },
-      (accessToken, refreshToken, profile, done) => {
-        const { email } = profile._json;
-        User.findOne({ email }).then((user) => {
-          if (user) return done(null, user);
-          bcryptUtils
-            .generatePassword()
-            .then((randomPassword) => {
-              return bcryptUtils.hashPassword(randomPassword);
-            })
-            .then((hash) => User.create({ email, password: hash }))
-            .then((user) => done(null, user))
-            .catch((err) => done(err, false));
-        });
-      }
-    )
-  );
+//登入
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passReqToCallback: true,
+      passwordField: "password",
+    },
+    (req, email, password, cb) => {
+      User.findOne({ email })
+        .then((user) => {
+          if (!user)
+            throw new Error("warning_msg", "That email is not registered!");
+          return comparePassword(password, user.password).then((isMatch) => {
+            if (!isMatch)
+              throw new Error("warning_msg", "Email or Password incorrect.");
+            return cb(null, user);
+          });
+        })
+        .then((err) => cb(err));
+    }
+  )
+);
 
-  passport.serializeUser((user, done) => {
-    done(null, user.id);
-  });
-
-  passport.deserializeUser((id, done) => {
-    User.findById(id)
-      .lean()
-      .then((user) => done(null, user))
-      .catch((err) => done(err, false));
-  });
+//註冊
+const jwtOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET || "secret",
 };
+
+passport.use(
+  new JWTStrategy(jwtOptions, (jwt_payload, cb) => {
+    User.findById(jwt_payload.id)
+      .lean()
+      .then((user) => cb(null, user))
+      .catch((err) => cb(err, false));
+  })
+);
+
+//facebook登入
+// passport.use(
+//   new FacebookStrategy(
+//     {
+//       clientID: process.env.FACEBOOK_ID,
+//       clientSecret: process.env.FACEBOOK_SECRET,
+//       callbackURL: process.env.BASE_URL,
+//       profileFields: ["email", "displayName"],
+//     },
+//     (accessToken, refreshToken, profile, cb) => {
+//       const { email } = profile._json;
+//       User.findOne({ email }).then((user) => {
+//         if (user) return cb(null, user);
+//         generatePassword()
+//           .then((randomPassword) => {
+//             return hashPassword(randomPassword);
+//           })
+//           .then((hash) => User.create({ email, password: hash }))
+//           .then((user) => cb(null, user))
+//           .catch((err) => cb(err, false));
+//       });
+//     }
+//   )
+// );
+
+//序列化
+passport.serializeUser((user, cb) => {
+  cb(null, user.id);
+});
+
+//反序列化
+passport.deserializeUser((id, cb) => {
+  User.findById(id)
+    .lean()
+    .then((user) => cb(null, user))
+    .catch((err) => cb(err, null));
+});
+
+module.exports = passport;
