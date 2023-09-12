@@ -1,16 +1,16 @@
-const bcrypt = require('bcryptjs');
-
+const bcrypt = require("bcryptjs");
 
 exports.comparePassword = (password, hashedPassword) => {
   return bcrypt.compareSync(password, hashedPassword);
-}
+};
 
-exports.generatePassword = (password) => {
-  const salt = bcrypt.genSaltSync(10);
-  const hash = bcrypt.hashSync(password, salt);
-  return hash;
-}
+// 產生隨機密碼
+exports.generatePassword = () => {
+  const randomPassword = Math.random().toString(36).slice(-8);
+  return randomPassword;
+};
 
+// 將密碼雜湊
 exports.hashPassword = (password) => {
   return new Promise((resolve, reject) => {
     bcrypt.genSalt(10, (err, salt) => {
@@ -18,7 +18,7 @@ exports.hashPassword = (password) => {
       bcrypt.hash(password, salt, (err, hash) => {
         if (err) reject(err);
         resolve(hash);
-      })
-    })
-  })
-}
+      });
+    });
+  });
+};
