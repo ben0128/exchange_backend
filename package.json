@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "node models/seeds/seeder.js"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "jsonwebtoken": "^9.0.2",
     "method-override": "^3.0.0",
     "mongoose": "^7.5.0",
+    "mongoose-auto-increment": "^5.0.1",
     "passport": "^0.6.0",
     "passport-facebook": "^3.0.0",
     "passport-jwt": "^4.0.1",

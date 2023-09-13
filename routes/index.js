@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("../config/passport");
-const { authenticator } = require("../middleware/auth");
+const authenticator = require("../middleware/auth");
 
 const { apiErrorHandler } = require('../middleware/errorHandler')
 
