@@ -16,21 +16,24 @@ passport.use(
   new LocalStrategy(
     {
       usernameField: "email",
-      passReqToCallback: true,
       passwordField: "password",
     },
-    (req, email, password, cb) => {
-      User.findOne({ email })
-        .then((user) => {
-          if (!user)
-            throw new Error("warning_msg", "That email is not registered!");
-          return comparePassword(password, user.password).then((isMatch) => {
-            if (!isMatch)
-              throw new Error("warning_msg", "Email or Password incorrect.");
-            return cb(null, user);
-          });
-        })
-        .then((err) => cb(err));
+    async (email, password, done) => {
+      try {
+        const user = await User.findOne({ email });
+        console.log('user', user)
+        if (!user) {
+          return done(null, false, { message: "使用者不存在" });
+        }
+        const isMatch = comparePassword(password, user.password);
+        console.log('isMatch', isMatch)
+        if (!isMatch) {
+          return done(null, false, { message: "密碼不正確" });
+        }
+        return done(null, user);
+      } catch (err) {
+        return done(err);
+      }
     }
   )
 );

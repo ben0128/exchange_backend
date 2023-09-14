@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 
 exports.comparePassword = (password, hashedPassword) => {
-  return bcrypt.compareSync(password, hashedPassword);
+  const result = bcrypt.compareSync(password, hashedPassword);
+  return result
 };
 
 // 產生隨機密碼

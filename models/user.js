@@ -1,12 +1,12 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema
+const Schema = mongoose.Schema;
 const userSchema = new Schema({
   id: {
     type: Number,
     required: true,
     unique: true,
-    default: Date.now
+    default: Date.now,
   },
   email: {
     type: String,
@@ -23,22 +23,22 @@ const userSchema = new Schema({
   },
   order: {
     type: [mongoose.Schema.Types.ObjectId], // 如果是关联到其他数据，请使用对应的数据类型
-    ref: 'Order', // 可能关联到的订单模型,
+    ref: "Order", // 可能关联到的订单模型,
   },
   journal: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: 'Journal', // 可能关联到的日记模型
+    ref: "Journal", // 可能关联到的日记模型
   },
   favoriteTargets: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: 'Targets', // 可能关联到的喜爱目标模型
+    ref: "Targets", // 可能关联到的喜爱目标模型
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
-})
+    default: Date.now,
+  },
+});
 
-const User = mongoose.model('User', userSchema)
+const User = mongoose.model("User", userSchema);
 
-module.exports = User
+module.exports = User;

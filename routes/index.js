@@ -11,13 +11,10 @@ const userController = require("../controllers/userController");
 // const orderController = require("../controllers/orderController");
 
 // 使用者相關
-router.post(
-  "/signup",
-  userController.signUp
-); // 註冊
+router.post("/signup",userController.signUp); // 註冊
 router.post('/signin', passport.authenticate("local", {
   session: false,
-  failureMessage: true,
+  failureFlash: true,
 }), userController.signIn) // 登入
 router.get('/user', userController.getUser) // 取得使用者資料
 router.put('/user', userController.putUser) // 修改使用者資料
