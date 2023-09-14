@@ -33,10 +33,18 @@ const userSchema = new Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Targets", // 可能关联到的喜爱目标模型
   },
+  account: {
+    type: Number,
+    default: 1000000,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  }
 });
 
 const User = mongoose.model("User", userSchema);

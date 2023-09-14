@@ -9,8 +9,9 @@ const createUser = async () => {
     const userId = await getNextId("userId");
     const newUser = new User({
       id: userId,
-      email: "1455454342@example.com",
+      email: "1455454hhh342@example.com",
       password: "123456",
+      account: 1000000,
     });
     const orderId = await getNextId("orderId");
     const newOrder = new Order({

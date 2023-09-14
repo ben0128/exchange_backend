@@ -21,12 +21,10 @@ passport.use(
     async (email, password, done) => {
       try {
         const user = await User.findOne({ email });
-        console.log('user', user)
         if (!user) {
           return done(null, false, { message: "使用者不存在" });
         }
         const isMatch = comparePassword(password, user.password);
-        console.log('isMatch', isMatch)
         if (!isMatch) {
           return done(null, false, { message: "密碼不正確" });
         }
@@ -46,7 +44,8 @@ const jwtOptions = {
 
 passport.use(
   new JWTStrategy(jwtOptions, (jwt_payload, cb) => {
-    User.findById(jwt_payload.id)
+    const { id } = jwt_payload;
+    User.findOne({ id })
       .lean()
       .then((user) => cb(null, user))
       .catch((err) => cb(err, false));
@@ -84,10 +83,18 @@ passport.serializeUser((user, cb) => {
 });
 
 //反序列化
-passport.deserializeUser((id, cb) => {
-  User.findById(id)
+passport.deserializeUser((_id, cb) => {
+  User.findOne({ _id })
+    .select('id') // 选择要返回的字段
     .lean()
-    .then((user) => cb(null, user))
+    .then((user) => {
+      if (!user) {
+        console.error("未找到用户");
+        return cb(null, null);
+      }
+      console.log(user);
+      cb(null, user);
+    })
     .catch((err) => cb(err, null));
 });
 

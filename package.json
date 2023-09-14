@@ -4,7 +4,7 @@
   "description": "NONE",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js",
+    "serve": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "node models/seeds/seeder.js"
   },
