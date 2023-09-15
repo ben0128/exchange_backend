@@ -33,13 +33,9 @@
     "jsonwebtoken": "^9.0.2",
     "method-override": "^3.0.0",
     "mongoose": "^7.5.0",
-    "npm": "^10.1.0",
     "passport": "^0.6.0",
     "passport-facebook": "^3.0.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
   }
 }

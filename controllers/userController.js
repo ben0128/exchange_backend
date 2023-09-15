@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const router = require("../routes/index");
-const getUser = require("../utils/_helpers");
 
 const { hashPassword, comparePassword } = require("../utils/bcrypt");
 
@@ -50,13 +49,14 @@ const userController = {
         httpOnly: true,
         secure: true,
       });
+      //導到 實際網址markets/allMarkets
       return res.status(200).json({ token });
     } catch (err) {
       return res.status(500).json("伺服器錯誤！");
     }
   },
   getUser: (req, res, next) => {
-    const user = getUser(req);
+    const user = req.user
     if (!user) {
       return res.status(200).json("無法取得使用者資料！");
     }
@@ -68,7 +68,7 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     const { password, checkPassword } = req.body;
-    const user = getUser(req);
+    const user = req.user
     if (!user) {
       return res.status(200).json("無法取得使用者資料！");
     }

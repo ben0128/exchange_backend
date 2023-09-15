@@ -26,11 +26,11 @@ const targetController = {
     }
   },
   deleteTarget: async (req, res) => {
-    const { targetName } = req.body;
+    const { id } = req.body;
     const user = req.user;
     try {
       await Target.findOneAndDelete({
-        targetName,
+        _id: id,
         userId: user.id,
       });
       return res.status(200).json("刪除目標成功！");

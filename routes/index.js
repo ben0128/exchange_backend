@@ -7,7 +7,7 @@ const { apiErrorHandler } = require("../middleware/errorHandler");
 
 const userController = require("../controllers/userController");
 const targetController = require("../controllers/targetController");
-// const journalController = require("../controllers/journalController");
+const journalController = require("../controllers/journalController");
 const orderController = require("../controllers/orderController");
 
 // 使用者相關
@@ -28,11 +28,11 @@ router.get("/targets", authenticator, targetController.getTargets); // 取得使
 router.post("/targets", authenticator, targetController.addTarget); // 新增使用者喜愛目標
 router.delete("/targets", authenticator, targetController.deleteTarget); // 刪除使用者喜愛目標
 
-// // 日記相關
-// router.get('/journals', authenticator, journalController.getJournals) // 取得使用者日記
-// router.post('/journals', authenticator, journalController.addJournal) // 新增使用者日記
-// router.put('/journals/:journalId', authenticator, journalController.putJournal) // 修改使用者日記
-// router.delete('/journals/:journalId', authenticator, journalController.deleteJournal) // 刪除使用者日記
+// 日記相關
+router.get('/journals', authenticator, journalController.getJournals) // 取得使用者日記
+router.post('/journals', authenticator, journalController.addJournal) // 新增使用者日記
+router.put('/journals/:journalId', authenticator, journalController.putJournal) // 修改使用者日記
+router.delete('/journals/:journalId', authenticator, journalController.deleteJournal) // 刪除使用者日記
 
 // 訂單相關
 router.get("/orders", authenticator, orderController.getOrders); // 取得使用者訂單

@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-const userSchema = new Schema({
+const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -25,7 +24,7 @@ const userSchema = new Schema({
   },
   favoriteTargets: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "Targets", // 可能关联到的喜爱目标模型
+    ref: "Target", // 可能关联到的喜爱目标模型
   },
   account: {
     type: Number,
