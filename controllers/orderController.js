@@ -1,28 +1,30 @@
 const User = require("../models/user");
 const Order = require("../models/order");
-const getNextId = require("../utils/getId");
-const getUser = require("../utils/_helpers");
+const mongoose = require("mongoose");
+const { session } = require("passport");
 
 const orderController = {
-  getOrders: (req, res) => {
-    const user = getUser(req);
-    // console.log("user", user);
-    Order.find({ userId: user.id })
-      .lean()
-      .then((orders) => {
-        return res.status(200).json({ orders });
-      })
-      .catch((err) => {
-        console.error(err);
-        return res.status(500).json(err);
-      });
+  getOrders: async (req, res) => {
+    try {
+      const user = req.user;
+      const order = await Order.find({ userId: user.id }).lean();
+      return res.status(200).json({ order });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
   },
-  addOrder: async (req, res) => {
-    const user = getUser(req);
+  addLimitOrder: async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    const user = req.user;
     const { targetName, shares, price, type } = req.body;
     try {
-      await Order.create({
-        id: await getNextId("orderId"),
+      if (user.account < shares * price) {
+        return res.status(400).json("餘額不足！");
+      }
+
+      const newOrder = new Order({
         targetName,
         shares,
         price,
@@ -30,26 +32,68 @@ const orderController = {
         userId: user.id,
         state: "pending",
       });
-      // console.log("order", order);
-      return res.status(200).json("新增訂單成功！");
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user.id },
+        { account: user.account - shares * price },
+        { new: true, session }
+      );
+      await newOrder.save({ session });
+      await updatedUser.save({ session });
+      await session.commitTransaction();
+      return res.status(200).json("新增限價單成功！");
     } catch (err) {
-      console.error(err);
+      await session.abortTransaction();
       return res.status(500).json(err);
+    } finally {
+      session.endSession();
     }
   },
   putOrder: async (req, res) => {
     const { shares, price, id } = req.body;
-    const user = getUser(req);
+    const user = req.user;
     try {
-      // 需要先檢查這張訂單是否是pending狀態
-      const updatedOrder = await Order.findOneAndUpdate(
-        { id, state: "pending", userId: user.id },
-        { shares, price, updatedAt: Date.now() }
-      );
-      if (!updatedOrder) {
-        return res.status(400).json("修改訂單失敗！");
+      // 拿價錢和shares
+      const oldOrder = await Order.findOne({ _id: id, userId: user.id }).lean();
+      if (!oldOrder) {
+        return res.status(400).json("指定訂單不存在或已完成！");
       }
-      return res.status(200).json("修改訂單成功！");
+      if (oldOrder.type === "buy") {
+        if (user.account >= shares * price - oldOrder.shares * oldOrder.price) {
+          const session = await mongoose.startSession();
+          session.startTransaction();
+          const newOrder = await Order.findOneAndUpdate(
+            {
+              _id: id,
+              state: "pending",
+              userId: user.id,
+            },
+            {
+              shares,
+              price,
+              updatedAt: Date.now(),
+            },
+            { new: true, session }
+          );
+          const updatedUser = await User.findOneAndUpdate(
+            { _id: user.id },
+            {
+              account:
+                user.account +
+                oldOrder.shares * oldOrder.price -
+                shares * price,
+            },
+            { new: true, session }
+          ).populate("orders");
+          await newOrder.save({ session });
+          await updatedUser.save({ session });
+          await session.commitTransaction();
+          return res.status(200).json("修改訂單成功！");
+        } else {
+          session.abortTransaction();
+          session.endSession();
+          return res.status(400).json("餘額不足！");
+        }
+      }
     } catch (err) {
       console.error(err);
       return res.status(500).json(err);
@@ -57,7 +101,7 @@ const orderController = {
   },
   deleteOrder: async (req, res) => {
     const { id } = req.body;
-    const user = getUser(req);
+    const user = req.user;
     try {
       const deletedOrder = await Order.findOneAndDelete({
         id,

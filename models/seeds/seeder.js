@@ -1,22 +1,20 @@
 //插入種子資料
 const db = require("../../config/mongoose");
 const User = require("../user");
-const getNextId = require("../../utils/getId");
+// const getNextId = require("../../utils/getId");
+const { hashedPassword } = require("../../utils/bcrypt");
 const Order = require("../order");
+const { hash } = require("bcryptjs");
 
 const createUser = async () => {
   try {
-    const userId = await getNextId("userId");
     const newUser = new User({
-      id: userId,
       email: "1455454hhh342@example.com",
-      password: "123456",
+      password: await hashedPassword("123456"),
       account: 1000000,
     });
-    const orderId = await getNextId("orderId");
     const newOrder = new Order({
-      id: orderId,
-      userId: 1,
+      userId: newUser._id,
       targetName: "AAPL",
       shares: 4,
       price: 180,

@@ -17,7 +17,7 @@ const authenticator = (req, res, next) => {
       });
     }
     req.user = {
-      id: user.id,
+      id: user._id,
       email: user.email,
       account: user.account,
     };

@@ -20,7 +20,7 @@ app.use(passport.initialize());
 app.use("/api", router);
 
 app.listen(port, () => {
-  console.log(`App is running on http://localhost:${port}`);
+  console.log(`App is running on ${port}`);
 });
 
 module.exports = app;

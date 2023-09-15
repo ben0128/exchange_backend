@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const router = require("../routes/index");
 const getUser = require("../utils/_helpers");
-const getNextId = require("../utils/getId");
+
 const { hashPassword, comparePassword } = require("../utils/bcrypt");
 
 const userController = {
@@ -23,9 +23,8 @@ const userController = {
       if (existingUser) {
         return res.status(400).json("此信箱已註冊！");
       }
-      const id = await getNextId("userId");
       const hashedPassword = await hashPassword(password);
-      await User.create({ email, password: hashedPassword, id });
+      await User.create({ email, password: hashedPassword });
       return res.status(200).json("註冊成功！");
     } catch (err) {
       console.error(err);

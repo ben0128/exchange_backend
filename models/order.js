@@ -2,12 +2,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
-  id: {
-    type: Number,
-    required: true,
-    unique: true,
-    default: Date.now,
-  },
   targetName: {
     type: String,
     required: true,
@@ -40,7 +34,6 @@ const orderSchema = new Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    type: Number,
     ref: "User",
   },
 });

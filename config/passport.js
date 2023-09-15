@@ -79,20 +79,19 @@ passport.use(
 
 //序列化
 passport.serializeUser((user, cb) => {
-  cb(null, user.id);
+  cb(null, user._id);
 });
 
 //反序列化
 passport.deserializeUser((_id, cb) => {
   User.findOne({ _id })
-    .select('id') // 选择要返回的字段
     .lean()
     .then((user) => {
       if (!user) {
         console.error("未找到用户");
         return cb(null, null);
       }
-      console.log(user);
+      // console.log(user);
       cb(null, user);
     })
     .catch((err) => cb(err, null));
