@@ -38,5 +38,8 @@
     "passport-facebook": "^3.0.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
