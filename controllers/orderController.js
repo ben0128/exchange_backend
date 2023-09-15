@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 const getNetShares = require("../utils/getNetShares");
 
-
 const orderController = {
   getOrders: async (req, res) => {
     try {
@@ -34,7 +33,7 @@ const orderController = {
         if (user.account < shares * price) {
           return res.status(400).json("餘額不足！");
         }
-  
+
         const updatedUser = await User.findOneAndUpdate(
           { _id: user.id },
           { account: user.account - shares * price },
@@ -78,21 +77,21 @@ const orderController = {
   //   }
   // },
   putOrder: async (req, res) => {
-    const { shares, price, id } = req.body;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    const { shares, price, _id } = req.body;
     const user = req.user;
     try {
       // 拿價錢和shares
-      const oldOrder = await Order.findOne({ _id: id, userId: user.id }).lean();
+      const oldOrder = await Order.findOne({ _id, userId: user.id }).lean();
       if (!oldOrder) {
         return res.status(400).json("指定訂單不存在或已完成！");
       }
       if (oldOrder.type === "buy") {
         if (user.account >= shares * price - oldOrder.shares * oldOrder.price) {
-          const session = await mongoose.startSession();
-          session.startTransaction();
           const newOrder = await Order.findOneAndUpdate(
             {
-              _id: id,
+              _id,
               state: "pending",
               userId: user.id,
             },
@@ -112,28 +111,29 @@ const orderController = {
                 shares * price,
             },
             { new: true, session }
-          ).populate("orders");
+          );
           await newOrder.save({ session });
           await updatedUser.save({ session });
           await session.commitTransaction();
           return res.status(200).json("修改訂單成功！");
         } else {
           session.abortTransaction();
-          session.endSession();
           return res.status(400).json("餘額不足！");
         }
       }
     } catch (err) {
       console.error(err);
       return res.status(500).json(err);
+    } finally {
+      session.endSession();
     }
   },
   deleteOrder: async (req, res) => {
-    const { id } = req.body;
+    const { _id } = req.body;
     const user = req.user;
     try {
       const deletedOrder = await Order.findOneAndDelete({
-        id,
+        _id,
         state: "pending",
         userId: user.id,
       });
