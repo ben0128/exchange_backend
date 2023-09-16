@@ -64,7 +64,7 @@ const orderController = {
     session.startTransaction();
     const user = req.user;
     const { targetName, shares, type } = req.body;
-    let updatedUser
+    let updatedUser;
     const newOrder = new Order({
       targetName,
       shares,
@@ -126,68 +126,96 @@ const orderController = {
     const { shares, price, _id } = req.body;
     const user = req.user;
     try {
-      // 拿價錢和shares
+      // 检查旧订单是否存在
       const oldOrder = await Order.findOne({ _id, userId: user.id }).lean();
       if (!oldOrder) {
+        await session.abortTransaction();
         return res.status(400).json("指定訂單不存在或已完成！");
       }
+
+      let updatedUserAccount = user.account;
       if (oldOrder.type === "buy") {
+        // 检查余额是否足够
         if (user.account >= shares * price - oldOrder.shares * oldOrder.price) {
-          const newOrder = await Order.findOneAndUpdate(
-            {
-              _id,
-              state: "pending",
-              userId: user.id,
-            },
-            {
-              shares,
-              price,
-              updatedAt: Date.now(),
-            },
-            { new: true, session }
-          );
-          const updatedUser = await User.findOneAndUpdate(
-            { _id: user.id },
-            {
-              account:
-                user.account +
-                oldOrder.shares * oldOrder.price -
-                shares * price,
-            },
-            { new: true, session }
-          );
-          await newOrder.save({ session });
-          await updatedUser.save({ session });
-          await session.commitTransaction();
-          return res.status(200).json("修改訂單成功！");
+          updatedUserAccount +=
+            oldOrder.shares * oldOrder.price - shares * price;
         } else {
-          session.abortTransaction();
+          await session.abortTransaction();
           return res.status(400).json("餘額不足！");
         }
       }
+
+      // 更新订单
+      const newOrder = await Order.findOneAndUpdate(
+        {
+          _id,
+          state: "pending",
+          userId: user.id,
+        },
+        {
+          shares,
+          price,
+          updatedAt: Date.now(),
+        },
+        { new: true, session }
+      );
+
+      // 检查更新是否成功
+      if (!newOrder) {
+        await session.abortTransaction();
+        return res.status(400).json("指定訂單不存在或已完成！");
+      }
+
+      // 更新用户余额
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user.id },
+        {
+          account: updatedUserAccount,
+        },
+        { new: true, session }
+      );
+
+      await session.commitTransaction();
+      return res.status(200).json("修改訂單成功！");
     } catch (err) {
       console.error(err);
+      await session.abortTransaction();
       return res.status(500).json(err);
     } finally {
       session.endSession();
     }
   },
   deleteOrder: async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     const { _id } = req.body;
     const user = req.user;
     try {
-      const deletedOrder = await Order.findOneAndDelete({
-        _id,
-        state: "pending",
-        userId: user.id,
-      });
+      const deletedOrder = await Order.findOneAndDelete(
+        {
+          _id,
+          userId: user.id,
+        },
+        { session }
+      );
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user.id },
+        {
+          account: user.account + deletedOrder.shares * deletedOrder.price,
+        },
+        { new: true, session }
+      );
       if (!deletedOrder) {
         return res.status(400).json("指定訂單不存在或已完成！");
       }
+      await session.commitTransaction();
       return res.status(200).json("刪除訂單成功！");
     } catch (err) {
+      await session.abortTransaction();
       console.error(err);
       return res.status(500).json(err);
+    } finally {
+      await session.endSession();
     }
   },
 };
