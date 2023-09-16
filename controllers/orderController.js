@@ -3,6 +3,7 @@ const Order = require("../models/order");
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 const getNetShares = require("../utils/getNetShares");
+const getTargetPrice = require("../utils/getTargetPrice");
 
 const orderController = {
   getOrders: async (req, res) => {
@@ -58,24 +59,67 @@ const orderController = {
       session.endSession();
     }
   },
-  // addMarketOrder: async (req, res) => {
-  //   const session = await mongoose.startSession();
-  //   session.startTransaction();
-  //   const user = req.user;
-  //   const { targetName, shares, type } = req.body;
-  //   try {
-  //     if (type === 'buy') {
-  //       const updatedUser = await User.findOneAndUpdate(
-  //         { _id: user.id },
-  //         { account: user.account - shares * 100 },
-  //         { new: true, session }
-  //       );
-  //       await updatedUser.save({ session });
-  //     }
-  //   } catch (err) {
+  addMarketOrder: async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    const user = req.user;
+    const { targetName, shares, type } = req.body;
+    let updatedUser
+    const newOrder = new Order({
+      targetName,
+      shares,
+      type,
+      userId: user.id,
+      state: "completed",
+      price: await getTargetPrice(targetName),
+    });
+    try {
+      if (type === "buy") {
+        if (user.account < shares * newOrder.price) {
+          return res.status(400).json("餘額不足！");
+        }
+        updatedUser = await User.findOneAndUpdate(
+          {
+            _id: user.id,
+          },
+          {
+            account: user.account - shares * newOrder.price,
+          },
+          {
+            new: true,
+            session,
+          }
+        );
+      }
+      if (type === "sell") {
+        const netShares = (await getNetShares(targetName)) || 0;
+        if (netShares < shares) {
+          return res.status(400).json("賣出後的股數不得為負數！");
+        }
+        updatedUser = await User.findOneAndUpdate(
+          {
+            _id: user.id,
+          },
+          {
+            account: user.account + shares * newOrder.price,
+          },
+          {
+            new: true,
+            session,
+          }
+        );
+      }
 
-  //   }
-  // },
+      await updatedUser.save({ session });
+      await newOrder.save({ session });
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      return res.status(500).json(err);
+    } finally {
+      session.endSession();
+    }
+  },
   putOrder: async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
