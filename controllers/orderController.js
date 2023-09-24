@@ -71,7 +71,7 @@ const orderController = {
       type,
       userId: user.id,
       state: "completed",
-      price: await getTargetPrice(targetName),
+      price: await getTargetPrice(targetName) || 180,
     });
     try {
       if (type === "buy") {
