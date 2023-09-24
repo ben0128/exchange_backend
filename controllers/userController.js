@@ -41,7 +41,7 @@ const userController = {
       if (!isMatch) {
         return res.status(400).json("登入失敗！");
       }
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "1 day",
       });
       res.cookie("token", token, {

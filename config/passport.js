@@ -44,8 +44,9 @@ const jwtOptions = {
 
 passport.use(
   new JWTStrategy(jwtOptions, (jwt_payload, cb) => {
-    const { id } = jwt_payload;
-    User.findOne({ id })
+    //解析token
+    const { _id } = jwt_payload;
+    User.findOne({ _id })
       .lean()
       .then((user) => cb(null, user))
       .catch((err) => cb(err, false));
