@@ -44,7 +44,6 @@ const orderController = {
       }
       if (type === "sell") {
         const netShares = (await getNetShares(targetName)) || 0;
-        // console.log("netShares", netShares)
         if (netShares < shares) {
           return res.status(400).json("賣出後的股數不得為負數！");
         }
@@ -113,6 +112,7 @@ const orderController = {
       await updatedUser.save({ session });
       await newOrder.save({ session });
       await session.commitTransaction();
+      return res.status(201).json("新增市價單成功！");
     } catch (err) {
       await session.abortTransaction();
       return res.status(500).json(err);

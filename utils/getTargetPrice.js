@@ -11,7 +11,7 @@ const getTargetPrice = (targetName) => {
       const intradayData = res.data["Time Series (1min)"];
       const latestData = intradayData[Object.keys(intradayData)[0]];
       const latestPrice = latestData["1. open"];
-      console.log(targetName ,res);
+      // console.log(targetName ,res);
       return latestPrice;
     })
     .catch((err) => {
