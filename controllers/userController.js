@@ -91,30 +91,25 @@ const userController = {
     const { email } = req.body;
     try {
       const user = User.findOne({ email }).lean();
+      const token = null
       if (user) {
-        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+        token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
           expiresIn: "1 day",
         });
-        res.cookie("token", token, {
-          maxAge: 86400000,
-          httpOnly: true,
-          secure: true,
-        });
-        return res.status(200).json({ token });
       } else {
-        const hash = await hashPassword(generatePassword());
+        const hash = await hashPassword();
         const newUser = await User.create({ email, password: hash });
         console.log(newUser)
-        const token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
+        token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
           expiresIn: "1 day",
         });
-        res.cookie("token", token, {
-          maxAge: 86400000,
-          httpOnly: true,
-          secure: true,
-        });
-        return res.status(200).json({ token });
       }
+      res.cookie("token", token, {
+        maxAge: 86400000,
+        httpOnly: true,
+        secure: true,
+      });
+      return res.status(200).json({ token });
     } catch (err) {
       console.error(err);
       return res.status(500).json("伺服器錯誤！");

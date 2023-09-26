@@ -13,6 +13,7 @@ exports.generatePassword = () => {
 
 // 將密碼雜湊
 exports.hashPassword = (password) => {
+  if (!password) password = this.generatePassword();
   return new Promise((resolve, reject) => {
     bcrypt.genSalt(10, (err, salt) => {
       if (err) reject(err);
