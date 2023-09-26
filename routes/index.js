@@ -20,7 +20,7 @@ router.post(
   }),
   userController.signIn
 ); // 登入
-router.get("/auth/facebook/callback", passport.authenticate("facebook", {
+router.get("auth/fb", passport.authenticate("facebook", {
   session: false,
   successRedirect: "/markets/allMarkets",
   failureRedirect: "/auth",
