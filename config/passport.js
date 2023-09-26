@@ -1,6 +1,7 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
+const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const {
   comparePassword,
   generatePassword,
@@ -74,6 +75,30 @@ passport.use(
           .then((hash) => User.create({ email, password: hash }))
           .then((user) => cb(null, user))
           .catch((err) => cb(err, false));
+      });
+    }
+  )
+);
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_ID,
+      clientSecret: process.env.GOOGLE_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK,
+      passReqToCallback: true,
+    },
+    (_, _, _, profile, done) => {
+      const { email } = profile._json;
+      User.findOne({ email }).then((user) => {
+        if (user) return done(null, user);
+        generatePassword()
+          .then((randomPassword) => {
+            return hashPassword(randomPassword);
+          })
+          .then((hash) => User.create({ email, password: hash }))
+          .then((user) => done(null, user))
+          .catch((err) => done(err, false));
       });
     }
   )

@@ -20,11 +20,26 @@ router.post(
   }),
   userController.signIn
 ); // 登入
-router.get("auth/fb", passport.authenticate("facebook", {
-  session: false,
-  successRedirect: "/markets/allMarkets",
-  failureRedirect: "/auth",
-})); // facebook登入
+// router.get("auth/fb", passport.authenticate("facebook", {
+//   session: false,
+//   successRedirect: "/markets/allMarkets",
+//   failureRedirect: "/auth",
+// })); // facebook登入
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+); // google登入
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    successRedirect: "/markets/allMarkets",
+    failureRedirect: "/auth",
+  })
+);
 
 // 使用者相關
 router.get("/user", authenticator, userController.getUser); // 取得使用者資料
@@ -36,15 +51,23 @@ router.post("/targets", authenticator, targetController.addTarget); // 新增使
 router.delete("/targets", authenticator, targetController.deleteTarget); // 刪除使用者喜愛目標
 
 // 日記相關
-router.get('/journals', authenticator, journalController.getJournals) // 取得使用者日記
-router.post('/journals', authenticator, journalController.addJournal) // 新增使用者日記
-router.put('/journals/:journalId', authenticator, journalController.putJournal) // 修改使用者日記
-router.delete('/journals/:journalId', authenticator, journalController.deleteJournal) // 刪除使用者日記
+router.get("/journals", authenticator, journalController.getJournals); // 取得使用者日記
+router.post("/journals", authenticator, journalController.addJournal); // 新增使用者日記
+router.put("/journals/:journalId", authenticator, journalController.putJournal); // 修改使用者日記
+router.delete(
+  "/journals/:journalId",
+  authenticator,
+  journalController.deleteJournal
+); // 刪除使用者日記
 
 // 訂單相關
 router.get("/orders", authenticator, orderController.getOrders); // 取得使用者訂單
 router.post("/orders/limitOrder", authenticator, orderController.addLimitOrder); // 新增使用者訂單
-router.post("/orders/marketOrder", authenticator, orderController.addMarketOrder); // 新增使用者訂單
+router.post(
+  "/orders/marketOrder",
+  authenticator,
+  orderController.addMarketOrder
+); // 新增使用者訂單
 router.put("/orders", authenticator, orderController.putOrder); // 修改使用者訂單
 router.delete("/orders", authenticator, orderController.deleteOrder); // 刪除使用者訂單
 
