@@ -10,7 +10,7 @@ const targetController = require("../controllers/targetController");
 const journalController = require("../controllers/journalController");
 const orderController = require("../controllers/orderController");
 
-// 使用者相關
+// 登入、註冊相關
 router.post("/signup", userController.signUp); // 註冊
 router.post(
   "/signin",
@@ -20,6 +20,13 @@ router.post(
   }),
   userController.signIn
 ); // 登入
+router.get("/auth/facebook/callback", passport.authenticate("facebook", {
+  session: false,
+  successRedirect: "/markets/allMarkets",
+  failureRedirect: "/auth",
+})); // facebook登入
+
+// 使用者相關
 router.get("/user", authenticator, userController.getUser); // 取得使用者資料
 router.put("/user", authenticator, userController.putUser); // 修改使用者資料
 

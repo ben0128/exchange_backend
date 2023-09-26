@@ -10,6 +10,7 @@ const User = require("../models/user");
 const passportJWT = require("passport-jwt");
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
+require("dotenv").config();
 
 //登入
 passport.use(
@@ -53,30 +54,30 @@ passport.use(
   })
 );
 
-//facebook登入
-// passport.use(
-//   new FacebookStrategy(
-//     {
-//       clientID: process.env.FACEBOOK_ID,
-//       clientSecret: process.env.FACEBOOK_SECRET,
-//       callbackURL: process.env.BASE_URL,
-//       profileFields: ["email", "displayName"],
-//     },
-//     (accessToken, refreshToken, profile, cb) => {
-//       const { email } = profile._json;
-//       User.findOne({ email }).then((user) => {
-//         if (user) return cb(null, user);
-//         generatePassword()
-//           .then((randomPassword) => {
-//             return hashPassword(randomPassword);
-//           })
-//           .then((hash) => User.create({ email, password: hash }))
-//           .then((user) => cb(null, user))
-//           .catch((err) => cb(err, false));
-//       });
-//     }
-//   )
-// );
+// facebook登入
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_ID,
+      clientSecret: process.env.FACEBOOK_SECRET,
+      callbackURL: process.env.BASE_URL,
+      profileFields: ["email", "displayName"],
+    },
+    (accessToken, refreshToken, profile, cb) => {
+      const { email } = profile._json;
+      User.findOne({ email }).then((user) => {
+        if (user) return cb(null, user);
+        generatePassword()
+          .then((randomPassword) => {
+            return hashPassword(randomPassword);
+          })
+          .then((hash) => User.create({ email, password: hash }))
+          .then((user) => cb(null, user))
+          .catch((err) => cb(err, false));
+      });
+    }
+  )
+);
 
 //序列化
 passport.serializeUser((user, cb) => {
