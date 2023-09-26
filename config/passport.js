@@ -88,7 +88,7 @@ passport.use(
       callbackURL: process.env.GOOGLE_CALLBACK,
       passReqToCallback: true,
     },
-    (_, _, _, profile, done) => {
+    (profile, done) => {
       const { email } = profile._json;
       User.findOne({ email }).then((user) => {
         if (user) return done(null, user);
