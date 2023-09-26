@@ -27,19 +27,21 @@ router.post(
 // })); // facebook登入
 
 router.get(
-  "/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-); // google登入
-
-router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     successRedirect: "/markets/allMarkets",
     failureRedirect: "/auth",
   })
 );
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+); // google登入
+
+
 
 // 使用者相關
 router.get("/user", authenticator, userController.getUser); // 取得使用者資料
