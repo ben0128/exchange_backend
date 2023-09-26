@@ -55,55 +55,6 @@ passport.use(
   })
 );
 
-// facebook登入
-passport.use(
-  new FacebookStrategy(
-    {
-      clientID: process.env.FACEBOOK_ID,
-      clientSecret: process.env.FACEBOOK_SECRET,
-      callbackURL: process.env.BASE_URL,
-      profileFields: ["email", "displayName"],
-    },
-    (accessToken, refreshToken, profile, cb) => {
-      const { email } = profile._json;
-      User.findOne({ email }).then((user) => {
-        if (user) return cb(null, user);
-        generatePassword()
-          .then((randomPassword) => {
-            return hashPassword(randomPassword);
-          })
-          .then((hash) => User.create({ email, password: hash }))
-          .then((user) => cb(null, user))
-          .catch((err) => cb(err, false));
-      });
-    }
-  )
-);
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK,
-      passReqToCallback: true,
-    },
-    (profile, done) => {
-      const { email } = profile._json;
-      User.findOne({ email }).then((user) => {
-        if (user) return done(null, user);
-        generatePassword()
-          .then((randomPassword) => {
-            return hashPassword(randomPassword);
-          })
-          .then((hash) => User.create({ email, password: hash }))
-          .then((user) => done(null, user))
-          .catch((err) => done(err, false));
-      });
-    }
-  )
-);
-
 //序列化
 passport.serializeUser((user, cb) => {
   cb(null, user._id);

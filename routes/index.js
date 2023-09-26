@@ -20,28 +20,8 @@ router.post(
   }),
   userController.signIn
 ); // 登入
-// router.get("auth/fb", passport.authenticate("facebook", {
-//   session: false,
-//   successRedirect: "/markets/allMarkets",
-//   failureRedirect: "/auth",
-// })); // facebook登入
 
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    successRedirect: "/markets/allMarkets",
-    failureRedirect: "/auth",
-  })
-);
-
-router.get(
-  "/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-); // google登入
-
-
+router.post("/auth/google", userController.googleLogin); // google登入
 
 // 使用者相關
 router.get("/user", authenticator, userController.getUser); // 取得使用者資料

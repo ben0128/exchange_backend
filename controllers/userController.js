@@ -56,7 +56,7 @@ const userController = {
     }
   },
   getUser: (req, res, next) => {
-    const user = req.user
+    const user = req.user;
     if (!user) {
       return res.status(200).json("無法取得使用者資料！");
     }
@@ -68,7 +68,7 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     const { password, checkPassword } = req.body;
-    const user = req.user
+    const user = req.user;
     if (!user) {
       return res.status(200).json("無法取得使用者資料！");
     }
@@ -85,6 +85,38 @@ const userController = {
     } catch (err) {
       console.error(err);
       return res.status(500).json("無法修改資料！");
+    }
+  },
+  googleLogin: async (req, res, next) => {
+    const { email } = req.body;
+    try {
+      const user = User.findOne({ email }).lean();
+      if (user) {
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+          expiresIn: "1 day",
+        });
+        res.cookie("token", token, {
+          maxAge: 86400000,
+          httpOnly: true,
+          secure: true,
+        });
+        return res.status(200).json({ token });
+      } else {
+        const hash = await hashPassword(generatePassword());
+        const newUser = await User.create({ email, password: hash });
+        const token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
+          expiresIn: "1 day",
+        });
+        res.cookie("token", token, {
+          maxAge: 86400000,
+          httpOnly: true,
+          secure: true,
+        });
+        return res.status(200).json({ token });
+      }
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json("伺服器錯誤！");
     }
   },
 };
