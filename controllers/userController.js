@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const router = require("../routes/index");
 
-const { hashPassword, comparePassword } = require("../utils/bcrypt");
+const { hashPassword, comparePassword, generatePassword } = require("../utils/bcrypt");
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -98,7 +98,8 @@ const userController = {
           expiresIn: "1 day",
         });
       } else {
-        const hash = await hashPassword();
+        const password = generatePassword();
+        const hash = await hashPassword(password);
         const newUser = await User.create({ email, password: hash });
         console.log(newUser)
         token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
