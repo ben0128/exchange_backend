@@ -89,6 +89,7 @@ const userController = {
   },
   googleLogin: async (req, res, next) => {
     const { email } = req.body;
+    console.log(req.body)
     try {
       const user = User.findOne({ email }).lean();
       let token = null
@@ -104,6 +105,7 @@ const userController = {
           expiresIn: "1 day",
         });
       }
+      console.log(token)
       res.cookie("token", token, {
         maxAge: 86400000,
         httpOnly: true,
