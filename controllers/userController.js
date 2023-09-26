@@ -104,6 +104,7 @@ const userController = {
       } else {
         const hash = await hashPassword(generatePassword());
         const newUser = await User.create({ email, password: hash });
+        console.log(newUser)
         const token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
           expiresIn: "1 day",
         });
