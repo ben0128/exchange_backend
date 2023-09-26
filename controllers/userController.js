@@ -91,7 +91,7 @@ const userController = {
     const { email } = req.body;
     try {
       const user = User.findOne({ email }).lean();
-      const token = null
+      let token = null
       if (user) {
         token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
           expiresIn: "1 day",
