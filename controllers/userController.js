@@ -91,7 +91,7 @@ const userController = {
     const { email } = req.body;
     console.log(req.body)
     try {
-      const user = User.findOne({ email }).lean();
+      const user = await User.findOne({ email }).lean();
       let token = null
       if (user) {
         token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
