@@ -11,7 +11,7 @@ require("dotenv").config();
 require("./config/mongoose");
 
 app.use(cors({
-  origin: '*',
+  origin: ['http://localhost:8080', 'https://accounts.google.com', 'https://exchange-frontend-tawny.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
