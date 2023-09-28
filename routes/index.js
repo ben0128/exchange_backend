@@ -30,7 +30,7 @@ router.put("/user", authenticator, userController.putUser); // 修改使用者�
 // 目標相關
 router.get("/targets", authenticator, targetController.getTargets); // 取得使用者喜愛目標
 router.post("/targets", authenticator, targetController.addTarget); // 新增使用者喜愛目標
-router.delete("/targets", authenticator, targetController.deleteTarget); // 刪除使用者喜愛目標
+router.delete("/targets/:targetId", authenticator, targetController.deleteTarget); // 刪除使用者喜愛目標
 
 // 日記相關
 router.get("/journals", authenticator, journalController.getJournals); // 取得使用者日記
