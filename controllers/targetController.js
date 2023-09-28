@@ -15,11 +15,16 @@ const targetController = {
     const user = req.user;
     const { targetName } = req.body;
     try {
-      await Target.create({
-        targetName,
-        userId: user.id,
-      });
-      return res.status(200).json("新增目標成功！");
+      const target = Target.findOne({ targetName, userId: user.id });
+      if (!target) {
+        await Target.create({
+          targetName,
+          userId: user.id,
+        });
+        return res.status(200).json("成功加入收藏！");
+      } else {
+        return res.status(400).json("目標已經加入收藏！");
+      }
     } catch (err) {
       console.error(err);
       return res.status(500).json(err);
