@@ -23,7 +23,7 @@ const targetController = {
         });
         return res.status(200).json("成功加入收藏！");
       } else {
-        return res.status(400).json("目標已經加入收藏！");
+        return res.status(200).json("目標已經加入收藏！");
       }
     } catch (err) {
       console.error(err);
