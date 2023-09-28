@@ -46,7 +46,7 @@ const targetController = {
   },
   isLiked: async (req, res) => {
     const user = req.user;
-    const { target } = req.body
+    const target = req.query.target;
     try {
       const status = await Target.findOne({ userId: user.id, targetName: target }).lean();
       if (status) {
