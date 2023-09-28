@@ -28,6 +28,7 @@ router.get("/user", authenticator, userController.getUser); // 取得使用者�
 router.put("/user", authenticator, userController.putUser); // 修改使用者資料
 
 // 目標相關
+router.get("/targets/isliked", authenticator, targetController.isLiked); // 取得使用者是否喜愛目標
 router.get("/targets", authenticator, targetController.getTargets); // 取得使用者喜愛目標
 router.post("/targets", authenticator, targetController.addTarget); // 新增使用者喜愛目標
 router.delete("/targets/:targetId", authenticator, targetController.deleteTarget); // 刪除使用者喜愛目標

@@ -44,6 +44,21 @@ const targetController = {
       return res.status(500).json(err);
     }
   },
+  isLiked: async (req, res) => {
+    const user = req.user;
+    const { target } = req.body
+    try {
+      const status = await Target.findOne({ userId: user.id, targetName: target }).lean();
+      if (status) {
+        return res.status(200).json(true);
+      } else {
+        return res.status(200).json(false);
+      }
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+  }
 };
 
 module.exports = targetController;
