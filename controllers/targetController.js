@@ -15,7 +15,7 @@ const targetController = {
     const user = req.user;
     const { targetName } = req.body;
     try {
-      const target = Target.findOne({ targetName, userId: user.id });
+      const target = await Target.findOne({ targetName, userId: user.id });
       if (!target) {
         await Target.create({
           targetName,
