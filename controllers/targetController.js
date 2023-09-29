@@ -13,17 +13,25 @@ const targetController = {
   },
   addTarget: async (req, res) => {
     const user = req.user;
-    const { targetName } = req.body;
+    const { targetName, isLiked } = req.body;
     try {
       const target = await Target.findOne({ targetName, userId: user.id });
-      if (!target) {
+      if (!target && isLiked) {
         await Target.create({
           targetName,
           userId: user.id,
         });
         return res.status(200).json("成功加入收藏！");
-      } else {
+      } else if (target && isLiked) {
         return res.status(200).json("目標已經加入收藏！");
+      } else if (!target && !isLiked) {
+        return res.status(200).json("目標已經從收藏中移除！");
+      } else {
+        await Target.findOneAndDelete({
+          targetName,
+          userId: user.id,
+        });
+        return res.status(200).json("成功從收藏中移除！");
       }
     } catch (err) {
       console.error(err);
