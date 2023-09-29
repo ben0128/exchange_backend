@@ -188,7 +188,7 @@ const orderController = {
   deleteOrder: async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
-    const { _id } = req.body;
+    const _id = req.params.orderId;
     const user = req.user;
     try {
       const deletedOrder = await Order.findOneAndDelete(
@@ -198,7 +198,7 @@ const orderController = {
         },
         { session }
       );
-      const updatedUser = await User.findOneAndUpdate(
+      await User.findOneAndUpdate(
         { _id: user.id },
         {
           account: user.account + deletedOrder.shares * deletedOrder.price,
