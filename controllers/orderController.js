@@ -1,7 +1,6 @@
 const User = require("../models/user");
 const Order = require("../models/order");
 const mongoose = require("mongoose");
-const { ObjectId } = mongoose.Types;
 const getNetShares = require("../utils/getNetShares");
 const getTargetPrice = require("../utils/getTargetPrice");
 
@@ -167,7 +166,7 @@ const orderController = {
       }
 
       // 更新用户余额
-      const updatedUser = await User.findOneAndUpdate(
+      await User.findOneAndUpdate(
         { _id: user.id },
         {
           account: updatedUserAccount,
@@ -198,13 +197,16 @@ const orderController = {
         },
         { session }
       );
-      await User.findOneAndUpdate(
-        { _id: user.id },
-        {
-          account: user.account + deletedOrder.shares * deletedOrder.price,
-        },
-        { new: true, session }
-      );
+      //如果訂單是買單，則退還餘額、賣單的話就不用更新餘額
+      if (deletedOrder.type === "buy") {
+        await User.findOneAndUpdate(
+          { _id: user.id },
+          {
+            account: user.account + deletedOrder.shares * deletedOrder.price,
+          },
+          { new: true, session }
+        );
+      }
       if (!deletedOrder) {
         return res.status(400).json("指定訂單不存在或已完成！");
       }
