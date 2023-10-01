@@ -126,7 +126,7 @@ const orderController = {
     const type = req.body.type;
     try {
       // 如果是限價賣單，就要增加餘額，買單則不用
-      if (!id) {
+      if (!_id) {
         return res.status(400).json("請輸入訂單id！");
       }
       if (type === "buy") {
