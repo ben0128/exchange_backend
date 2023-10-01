@@ -69,7 +69,7 @@ const orderController = {
       type,
       userId: user.id,
       state: "completed",
-      price: await getTargetPrice(targetName) || 180,
+      price: (await getTargetPrice(targetName)) || 180,
     });
     try {
       if (type === "buy") {
@@ -117,6 +117,15 @@ const orderController = {
       return res.status(500).json(err);
     } finally {
       session.endSession();
+    }
+  },
+  completeMarketOrder: async (req, res) => {
+    const id = req.params.orderId;
+    try {
+      await Order.findOneAndUpdate({ _id: id }, { state: "completed"})
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json(err);
     }
   },
   putOrder: async (req, res) => {
