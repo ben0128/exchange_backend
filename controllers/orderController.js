@@ -125,8 +125,7 @@ const orderController = {
     const _id = req.params.orderId;
     const type = req.body.type;
     try {
-      // 如果是限價賣單，就要扣除餘額，買單則不用
-      // 幫我寫一個function，可以根據id找到order，然後根據order的type去判斷要扣除餘額還是增加餘額
+      // 如果是限價賣單，就要增加餘額，買單則不用
       if (!id) {
         return res.status(400).json("請輸入訂單id！");
       }
