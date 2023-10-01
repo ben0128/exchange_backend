@@ -119,13 +119,40 @@ const orderController = {
       session.endSession();
     }
   },
-  completeMarketOrder: async (req, res) => {
-    const id = req.params.orderId;
+  completeLimitOrder: async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    const _id = req.params.orderId;
+    const type = req.body.type;
     try {
-      await Order.findOneAndUpdate({ _id: id }, { state: "completed"})
+      // 如果是限價賣單，就要扣除餘額，買單則不用
+      // 幫我寫一個function，可以根據id找到order，然後根據order的type去判斷要扣除餘額還是增加餘額
+      if (!id) {
+        return res.status(400).json("請輸入訂單id！");
+      }
+      if (type === "buy") {
+        await Order.findOneAndUpdate({ _id }, { state: "completed" });
+      } else if (type === "sell") {
+        // 更新user餘額，和order狀態
+        const completedOrder = await Order.findOneAndUpdate(
+          { _id },
+          { state: "completed" },
+          { new: true, session }
+        );
+        //需要將原始的餘額加上賣出的股票價格
+        await User.findOneAndUpdate(
+          { _id: completedOrder.userId },
+          { $inc: { account: completedOrder.shares * completedOrder.price } }
+        );
+      }
+      await session.commitTransaction();
+      return res.status(200).json("完成訂單成功！");
     } catch (err) {
       console.error(err);
+      await session.abortTransaction();
       return res.status(500).json(err);
+    } finally {
+      session.endSession();
     }
   },
   putOrder: async (req, res) => {

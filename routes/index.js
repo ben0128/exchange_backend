@@ -44,12 +44,9 @@ router.delete(
 ); // 刪除使用者日記
 
 // 訂單相關
+router.post("/orders/limitOrder/:orderId", authenticator, orderController.completeLimitOrder); // 新增使用者訂單
 router.post("/orders/limitOrder", authenticator, orderController.addLimitOrder); // 新增使用者訂單
-router.post(
-  "/orders/marketOrder",
-  authenticator,
-  orderController.addMarketOrder
-); // 新增使用者訂單
+router.post("/orders/marketOrder", authenticator, orderController.addMarketOrder); // 新增使用者訂單
 router.get("/orders", authenticator, orderController.getOrders); // 取得使用者訂單
 router.put("/orders", authenticator, orderController.putOrder); // 修改使用者訂單
 router.delete("/orders/:orderId", authenticator, orderController.deleteOrder); // 刪除使用者訂單
