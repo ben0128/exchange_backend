@@ -22,7 +22,6 @@ const orderController = {
     const user = req.user;
     const { targetName, shares, price, type } = req.body;
     const orderId = new mongoose.Types.ObjectId();
-    console.log(orderId)
     try {
       const newOrder = new Order({
         _id: orderId,
@@ -51,12 +50,14 @@ const orderController = {
           return res.status(400).json("賣出後的股數不得為負數！");
         }
       }
-      await axios.post('http://172.28.0.2:8000/api/receive_order', {
+      // 將訂單資訊傳送到colab做webhook
+      await axios.post('https://cdb1-34-86-77-35.ngrok.io/api/receive_order', {
         "_id": orderId,
         "targetName": targetName,
         "price": price,
         "type": type,
       })
+
       await newOrder.save({ session });
       await session.commitTransaction();
       return res.status(201).json("新增限價單成功！");
