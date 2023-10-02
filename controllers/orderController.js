@@ -51,7 +51,7 @@ const orderController = {
           return res.status(400).json("賣出後的股數不得為負數！");
         }
       }
-      await axios.post('https://your-colab-api-endpoint-url', {
+      await axios.post('http://172.28.0.2:8000/api/receive_order', {
         "_id": orderId,
         "targetName": targetName,
         "price": price,
