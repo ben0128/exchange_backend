@@ -51,12 +51,12 @@ const orderController = {
         }
       }
       // 將訂單資訊傳送到colab做webhook
-      await axios.post('https://cdb1-34-86-77-35.ngrok.io/api/receive_order', {
-        "_id": orderId,
-        "targetName": targetName,
-        "price": price,
-        "type": type,
-      })
+      // await axios.post('https://cdb1-34-86-77-35.ngrok.io/api/receive_order', {
+      //   "_id": orderId,
+      //   "targetName": targetName,
+      //   "price": price,
+      //   "type": type,
+      // })
 
       await newOrder.save({ session });
       await session.commitTransaction();
