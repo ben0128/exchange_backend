@@ -3,6 +3,7 @@ const Order = require("../models/order");
 const mongoose = require("mongoose");
 const getNetShares = require("../utils/getNetShares");
 const getTargetPrice = require("../utils/getTargetPrice");
+const axios = require("axios");
 
 const orderController = {
   getOrders: async (req, res) => {
@@ -20,8 +21,11 @@ const orderController = {
     session.startTransaction();
     const user = req.user;
     const { targetName, shares, price, type } = req.body;
+    const orderId = new mongoose.Types.ObjectId();
+    console.log(orderId)
     try {
       const newOrder = new Order({
+        _id: orderId,
         targetName,
         shares,
         price,
@@ -47,6 +51,12 @@ const orderController = {
           return res.status(400).json("賣出後的股數不得為負數！");
         }
       }
+      await axios.post('https://your-colab-api-endpoint-url', {
+        "_id": orderId,
+        "targetName": targetName,
+        "price": price,
+        "type": type,
+      })
       await newOrder.save({ session });
       await session.commitTransaction();
       return res.status(201).json("新增限價單成功！");
