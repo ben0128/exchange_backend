@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const router = require("../routes/index");
 
 const { hashPassword, comparePassword, generatePassword } = require("../utils/bcrypt");
 

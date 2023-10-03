@@ -1,11 +1,7 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const FacebookStrategy = require("passport-facebook").Strategy;
-const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const {
   comparePassword,
-  generatePassword,
-  hashPassword,
 } = require("../utils/bcrypt");
 const User = require("../models/user");
 const passportJWT = require("passport-jwt");

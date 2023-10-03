@@ -1,4 +1,3 @@
-const User = require("../models/user");
 const Journal = require("../models/journal");
 
 const journalController = {

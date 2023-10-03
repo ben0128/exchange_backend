@@ -15,16 +15,16 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   order: {
-    type: [mongoose.Schema.Types.ObjectId], // 如果是关联到其他数据，请使用对应的数据类型
-    ref: "Order", // 可能关联到的订单模型,
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Order", 
   },
   journal: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "Journal", // 可能关联到的日记模型
+    ref: "Journal",
   },
   favoriteTargets: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "Target", // 可能关联到的喜爱目标模型
+    ref: "Target",
   },
   account: {
     type: Number,

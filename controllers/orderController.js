@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const getNetShares = require("../utils/getNetShares");
 const getTargetPrice = require("../utils/getTargetPrice");
 const axios = require("axios");
+require("dotenv").config();
 
 const orderController = {
   getOrders: async (req, res) => {
@@ -54,7 +55,7 @@ const orderController = {
       // 將訂單資訊傳送到colab做webhook
       console.log(orderId.toString(), targetName, price, type)
       const axiosResponse = await axios.post(
-        "https://7e1a-34-81-137-91.ngrok.io/api/receive_order",
+        `${ process.env.webhookURL }/api/receive_order`,
         {
           id: orderId.toString(),
           targetName: targetName,
@@ -180,7 +181,6 @@ const orderController = {
     const { shares, price, _id } = req.body;
     const user = req.user;
     try {
-      // 检查旧订单是否存在
       const oldOrder = await Order.findOne({ _id, userId: user.id }).lean();
       if (!oldOrder) {
         await session.abortTransaction();
@@ -189,7 +189,7 @@ const orderController = {
 
       let updatedUserAccount = user.account;
       if (oldOrder.type === "buy") {
-        // 检查余额是否足够
+        // 檢查餘額是否足夠
         if (user.account >= shares * price - oldOrder.shares * oldOrder.price) {
           updatedUserAccount +=
             oldOrder.shares * oldOrder.price - shares * price;
@@ -199,7 +199,7 @@ const orderController = {
         }
       }
 
-      // 更新订单
+      // 更新訂單
       const newOrder = await Order.findOneAndUpdate(
         {
           _id,
@@ -214,13 +214,12 @@ const orderController = {
         { new: true, session }
       );
 
-      // 检查更新是否成功
       if (!newOrder) {
         await session.abortTransaction();
         return res.status(400).json("指定訂單不存在或已完成！");
       }
 
-      // 更新用户余额
+      // 更新user餘額
       await User.findOneAndUpdate(
         { _id: user.id },
         {

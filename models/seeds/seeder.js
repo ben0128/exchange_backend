@@ -1,10 +1,8 @@
 //插入種子資料
 const db = require("../../config/mongoose");
 const User = require("../user");
-// const getNextId = require("../../utils/getId");
 const { hashedPassword } = require("../../utils/bcrypt");
 const Order = require("../order");
-const { hash } = require("bcryptjs");
 
 const createUser = async () => {
   try {
