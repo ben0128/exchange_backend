@@ -3,7 +3,6 @@ const Order = require("../models/order");
 const mongoose = require("mongoose");
 const getNetShares = require("../utils/getNetShares");
 const getTargetPrice = require("../utils/getTargetPrice");
-const axios = require("axios");
 require("dotenv").config();
 
 const orderController = {
@@ -18,7 +17,6 @@ const orderController = {
     }
   },
   addLimitOrder: async (req, res) => {
-    let isTransactionSuccess = false;
     const session = await mongoose.startSession();
     session.startTransaction();
     const user = req.user;
@@ -41,7 +39,7 @@ const orderController = {
 
         const updatedUser = await User.findOneAndUpdate(
           { _id: user.id },
-          { account: user.account - shares * price },
+          { $inc: { account: -shares * price } },
           { new: true, session }
         );
         await updatedUser.save({ session });
@@ -54,12 +52,9 @@ const orderController = {
       }
       await newOrder.save({ session });
       await session.commitTransaction();
-      isTransactionSuccess = true;
       return res.status(201).json("新增限價單成功！");
     } catch (err) {
-      if (!isTransactionSuccess) {
-        await session.abortTransaction();
-      }
+      await session.abortTransaction();
       return res.status(500).json(err);
     } finally {
       session.endSession();
@@ -88,9 +83,7 @@ const orderController = {
           {
             _id: user.id,
           },
-          {
-            account: user.account - shares * newOrder.price,
-          },
+          { $inc: { account: -shares * newOrder.price } },
           {
             new: true,
             session,
@@ -106,9 +99,7 @@ const orderController = {
           {
             _id: user.id,
           },
-          {
-            account: user.account + shares * newOrder.price,
-          },
+          { $inc: { account: +shares * newOrder.price } },
           {
             new: true,
             session,
@@ -207,9 +198,7 @@ const orderController = {
       if (deletedOrder.type === "buy") {
         await User.findOneAndUpdate(
           { _id: user.id },
-          {
-            account: user.account + deletedOrder.shares * deletedOrder.price,
-          },
+          { $inc: { account: +deletedOrder.shares * deletedOrder.price } },
           { new: true, session }
         );
       }
