@@ -148,7 +148,7 @@ const orderController = {
     try {
       // 如果是限價賣單，就要增加餘額，買單則不用
       if (!_id) {
-        return res.status(400).json("請輸入訂單id！");
+        return res.status(200).json("找不到訂單可能已被刪除");
       }
       if (type === "buy") {
         await Order.findOneAndUpdate({ _id }, { state: "completed" });
