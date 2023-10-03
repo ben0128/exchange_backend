@@ -52,19 +52,6 @@ const orderController = {
           return res.status(400).json("賣出後的股數不得為負數！");
         }
       }
-      // 將訂單資訊傳送到colab做webhook
-      console.log(orderId.toString(), targetName, price, type)
-      const axiosResponse = await axios.post(
-        `${ process.env.webhookURL }/api/receive_order`,
-        {
-          id: orderId.toString(),
-          targetName: targetName,
-          price: price,
-          type: type,
-        }
-      );
-
-      console.log(axiosResponse.data);
       await newOrder.save({ session });
       await session.commitTransaction();
       isTransactionSuccess = true;
@@ -134,41 +121,6 @@ const orderController = {
       await session.commitTransaction();
       return res.status(201).json("新增市價單成功！");
     } catch (err) {
-      await session.abortTransaction();
-      return res.status(500).json(err);
-    } finally {
-      session.endSession();
-    }
-  },
-  completeLimitOrder: async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    const _id = req.params.orderId;
-    const type = req.body.type;
-    try {
-      // 如果是限價賣單，就要增加餘額，買單則不用
-      if (!_id) {
-        return res.status(200).json("找不到訂單可能已被刪除");
-      }
-      if (type === "buy") {
-        await Order.findOneAndUpdate({ _id }, { state: "completed" });
-      } else if (type === "sell") {
-        // 更新user餘額，和order狀態
-        const completedOrder = await Order.findOneAndUpdate(
-          { _id },
-          { state: "completed" },
-          { new: true, session }
-        );
-        //需要將原始的餘額加上賣出的股票價格
-        await User.findOneAndUpdate(
-          { _id: completedOrder.userId },
-          { $inc: { account: completedOrder.shares * completedOrder.price } }
-        );
-      }
-      await session.commitTransaction();
-      return res.status(200).json("完成訂單成功！");
-    } catch (err) {
-      console.error(err);
       await session.abortTransaction();
       return res.status(500).json(err);
     } finally {
