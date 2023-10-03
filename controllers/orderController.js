@@ -50,6 +50,7 @@ const orderController = {
           return res.status(400).json("賣出後的股數不得為負數！");
         }
       }
+      console.log(newOrder)
       await newOrder.save({ session });
       await session.commitTransaction();
       return res.status(201).json("新增限價單成功！");
@@ -106,7 +107,7 @@ const orderController = {
           }
         );
       }
-
+      console.log(updatedUser)
       await updatedUser.save({ session });
       await newOrder.save({ session });
       await session.commitTransaction();
