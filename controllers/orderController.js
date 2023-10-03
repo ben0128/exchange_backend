@@ -17,6 +17,7 @@ const orderController = {
     }
   },
   addLimitOrder: async (req, res) => {
+    let isTransactionSuccess = false;
     const session = await mongoose.startSession();
     session.startTransaction();
     const user = req.user;
@@ -51,18 +52,26 @@ const orderController = {
         }
       }
       // 將訂單資訊傳送到colab做webhook
-      await axios.post('https://3b6e-35-201-157-208.ngrok.io/api/receive_order', {
-        "_id": orderId,
-        "targetName": targetName,
-        "price": price,
-        "type": type,
-      })
+      console.log(orderId.toString(), targetName, price, type)
+      const axiosResponse = await axios.post(
+        "https://7e1a-34-81-137-91.ngrok.io/api/receive_order",
+        {
+          id: orderId.toString(),
+          targetName: targetName,
+          price: price,
+          type: type,
+        }
+      );
 
+      console.log(axiosResponse.data);
       await newOrder.save({ session });
       await session.commitTransaction();
+      isTransactionSuccess = true;
       return res.status(201).json("新增限價單成功！");
     } catch (err) {
-      await session.abortTransaction();
+      if (!isTransactionSuccess) {
+        await session.abortTransaction();
+      }
       return res.status(500).json(err);
     } finally {
       session.endSession();
