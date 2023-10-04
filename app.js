@@ -1,7 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const cors = require("cors");
-// const flash = require("connect-flash");
+const flash = require("connect-flash");
 const methodOverride = require("method-override");
 const router = require("./routes/index");
 const app = express();
@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-// app.use(flash());
+app.use(flash());
 app.use(passport.initialize());
 app.use("/api", router);
 
