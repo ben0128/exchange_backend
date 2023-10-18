@@ -34,7 +34,7 @@ passport.use(
   )
 );
 
-//註冊
+
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET || "secret",
@@ -50,25 +50,5 @@ passport.use(
       .catch((err) => cb(err, false));
   })
 );
-
-//序列化
-passport.serializeUser((user, cb) => {
-  cb(null, user._id);
-});
-
-//反序列化
-passport.deserializeUser((_id, cb) => {
-  User.findOne({ _id })
-    .lean()
-    .then((user) => {
-      if (!user) {
-        console.error("未找到用户");
-        return cb(null, null);
-      }
-      // console.log(user);
-      cb(null, user);
-    })
-    .catch((err) => cb(err, null));
-});
 
 module.exports = passport;
